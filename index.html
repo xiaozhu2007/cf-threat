@@ -34,7 +34,7 @@
           credentials: "include"
         }).then((resp) => {
           if (resp.ok) {
-            let score = resp.headers.get("Debug-Cf-Threat");
+            let score = parseInt(resp.headers.get("Debug-Cf-Threat"));
             let color = "";
             if (score < 5) {
               color = "green";
