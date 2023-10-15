@@ -18,14 +18,14 @@
     <h3>Request Trace</h3>
     <pre id="request-info"></pre>
     <script>
-      fetch("https://dos-test.against-ddos.eu.org/cdn-cgi/trace").then((resp) =>
+      fetch("/cdn-cgi/trace").then((resp) =>
         resp.text().then((data) => {
           document.getElementById("request-info").innerText = data;
         })
       );
 
       const runcheck = () => {
-        fetch(`https://dos-test.against-ddos.eu.org/?${+new Date()}`, {
+        fetch(`/?${+new Date()}`, {
           method: "GET",
           headers: {
             "X-Requested-With": "fetch"
