@@ -34,7 +34,8 @@
           credentials: "include"
         }).then((resp) => {
           if (resp.ok) {
-            let score = parseInt(new Headers(resp.headers).get("Debug-Cf-Threat")) || 520;
+            let score = parseInt(new Headers(resp.headers).get("Debug-Cf-Threat"));
+            if (score = NaN) let score = 520;
             let color = "";
             if (score < 5) {
               color = "green";
