@@ -1,56 +1,60 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
     <title>Cloudflare Threat Score Test</title>
-</head>
+  </head>
 
-<body>
+  <body>
     <h1>Test Your Cloudflare Threat Score</h1>
     <p>测试您的 IP 当前在 Cloudflare 的声誉</p>
-    <br><br>
+    <br /><br />
     <div id="threat-score">正在测试中，大概需要 8 ~ 15 秒....</div>
-    <p>0 表示 Cloudflare 判定为无风险，>= 15 将无法直接访问中等安全的网站，>= 25 将无法直接访问低安全的网站。</p>
+    <p>
+      0 表示 Cloudflare 判定为无风险，>= 15 将无法直接访问中等安全的网站，>= 25
+      将无法直接访问低安全的网站。
+    </p>
     <h3>Request Trace</h3>
-      <pre id="request-info"></pre>
-    </section>
+    <pre id="request-info"></pre>
     <script>
-        fetch('/cdn-cgi/trace').then((resp) => resp.text().then(data => {
-            document.getElementById('request-info').innerHTML = data;
-        }))
+      fetch("https://dos-test.against-ddos.eu.org/cdn-cgi/trace").then((resp) =>
+        resp.text().then((data) => {
+          document.getElementById("request-info").innerText = data;
+        })
+      );
 
-        const runcheck = (level, max) => new Promise((resolve, reject) => {
-            console.log(level);
-            if (level == max) {
-                reject(level);
-            }
-            fetch(`/i.txt?t=${level}&${+(new Date)}`).catch(() => { reject(50); })
-            .then((resp) => {
-                if (!resp.ok) {
-                    reject(level);
-                } else { runcheck(level+1, max).catch(v => { reject(v) }) };
-            })
-        });
-
-        runcheck(0, 80).then(() => {
-            document.getElementById('threat-score').innerHTML = `测试失败`;
-        }).catch(score => {
-            let color = '';
+      const runcheck = () => {
+        fetch(`https://dos-test.against-ddos.eu.org/?${+new Date()}`, {
+          method: "GET",
+          headers: {
+            "X-Requested-With": "fetch"
+          },
+          mode: "cors",
+          credentials: "include"
+        }).then((resp) => {
+          if (resp.ok) {
+            let score = resp.headers.get("Debug-Cf-Threat");
+            let color = "";
             if (score < 5) {
-                color = 'green'
+              color = "green";
             } else if (score < 20) {
-                color = 'yellow'
+              color = "yellow";
             } else if (score <= 100) {
-                color = 'red'
+              color = "red";
             }
-            if (score >= 49) {
-                score = '>49'
+            if (score >= 80) {
+              score = ">=80";
             }
-            document.getElementById('threat-score').innerHTML = `您的 IP 当前在 Cloudflare 的威胁指数是: <span style="font-size: xxx-large; color: ${color};">${score}</span>`;
+            document.getElementById(
+              "threat-score"
+            ).innerHTML = `您的 IP 当前在 Cloudflare 的威胁指数是: <span style="font-size: xxx-large; color: ${color};">${score}</span>`;
+          } else {
+            document.getElementById("threat-score").innerHTML = `测试失败`;
+          }
         });
+      };
+      runcheck();
     </script>
-</body>
-
+  </body>
 </html>
