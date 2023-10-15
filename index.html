@@ -8,12 +8,12 @@
 
   <body>
     <h1>Test Your Cloudflare Threat Score</h1>
-    <p>测试您的 IP 当前在 Cloudflare 的声誉</p>
+    <p>测试您的 IP 当前在 Cloudflare 的信誉</p>
     <br /><br />
     <div id="threat-score">正在测试中，大概需要 8 ~ 15 秒....</div>
     <p>
       0 表示 Cloudflare 判定为无风险，>= 15 将无法直接访问中等安全的网站，>= 25
-      将无法直接访问低安全的网站。
+      将无法直接访问低安全的网站。如果为 520 则代表测试服务器暂时无法访问，请尝试联系网站管理员/更换网络环境访问。
     </p>
     <h3>Request Trace</h3>
     <pre id="request-info"></pre>
@@ -34,7 +34,7 @@
           credentials: "include"
         }).then((resp) => {
           if (resp.ok) {
-            let score = parseInt(new Headers(resp.headers).get("Debug-Cf-Threat"));
+            let score = parseInt(new Headers(resp.headers).get("Debug-Cf-Threat")) || 520;
             let color = "";
             if (score < 5) {
               color = "green";
@@ -42,9 +42,8 @@
               color = "yellow";
             } else if (score <= 100) {
               color = "red";
-            }
-            if (score >= 80) {
-              score = ">=80";
+            } else if (score > 100) {
+              color = "purple";
             }
             document.getElementById(
               "threat-score"
