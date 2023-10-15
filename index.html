@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Cloudflare Threat Score Test</title>
+</head>
+
+<body>
+    <h1>Test Your Cloudflare Threat Score</h1>
+    <p>测试您的 IP 当前在 Cloudflare 的声誉</p>
+    <br><br>
+    <div id="threat-score">正在测试中，大概需要 8 ~ 15 秒....</div>
+    <p>0 表示 Cloudflare 判定为无风险，>= 15 将无法直接访问中等安全的网站，>= 25 将无法直接访问低安全的网站。</p>
+    <h3>Request Trace</h3>
+      <pre id="request-info"></pre>
+    </section>
+    <script>
+        fetch('/cdn-cgi/trace').then((resp) => resp.text().then(data => {
+            document.getElementById('request-info').innerHTML = data;
+        }))
+
+        const runcheck = (level, max) => new Promise((resolve, reject) => {
+            console.log(level);
+            if (level == max) {
+                reject(level);
+            }
+            fetch(`/i.txt?t=${level}&${+(new Date)}`).catch(() => { reject(50); })
+            .then((resp) => {
+                if (!resp.ok) {
+                    reject(level);
+                } else { runcheck(level+1, max).catch(v => { reject(v) }) };
+            })
+        });
+
+        runcheck(0, 80).then(() => {
+            document.getElementById('threat-score').innerHTML = `测试失败`;
+        }).catch(score => {
+            let color = '';
+            if (score < 5) {
+                color = 'green'
+            } else if (score < 20) {
+                color = 'yellow'
+            } else if (score <= 100) {
+                color = 'red'
+            }
+            if (score >= 49) {
+                score = '>49'
+            }
+            document.getElementById('threat-score').innerHTML = `您的 IP 当前在 Cloudflare 的威胁指数是: <span style="font-size: xxx-large; color: ${color};">${score}</span>`;
+        });
+    </script>
+</body>
+
+</html>
